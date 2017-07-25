@@ -56,7 +56,10 @@ type directoryListEntry struct {
 }
 
 type fileViewerContext struct {
+<<<<<<< HEAD
 	FilePath       string
+=======
+>>>>>>> Do not pass langserver info to javascript UI
 	PathSegments   []breadCrumbEntry
 	Repo           config.RepoConfig
 	Commit         string
@@ -172,7 +175,7 @@ func buildDirectoryListEntry(treeEntry gitTreeEntry, pathFromRoot string, repo c
 	}
 }
 
-func buildFileData(relativePath string, repo config.RepoConfig, commit string, langServersPorts []int) (*fileViewerContext, error) {
+func buildFileData(relativePath string, repo config.RepoConfig, commit string) (*fileViewerContext, error) {
 	cleanPath := path.Clean(relativePath)
 	if cleanPath == "." {
 		cleanPath = ""
