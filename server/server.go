@@ -6,14 +6,13 @@ import (
 	"io"
 	"net/http"
 	"path"
-	"strings"
 	texttemplate "text/template"
 	"time"
 
 	"golang.org/x/net/context"
 
 	"github.com/bmizerany/pat"
-	libhoney "github.com/honeycombio/libhoney-go"
+	"github.com/honeycombio/libhoney-go"
 
 	"github.com/livegrep/livegrep/server/config"
 	"github.com/livegrep/livegrep/server/log"
@@ -224,25 +223,28 @@ func (s *server) ServeOpensearch(ctx context.Context, w http.ResponseWriter, r *
 
 type GotoDefRequest struct {
 	FilePath string `json:"file_path"`
-	Row      int32  `json:"row"`
-	Col      int32  `json:"col"`
+	Row      int  `json:"row"`
+	Col      int  `json:"col"`
 }
 
 type GotoDefResponse struct {
 	Success    bool   `json:"success"`
 	FilePath   string `json:"file_path"`
-	LineNumber int32  `json:"line_num"`
+	LineNumber int    `json:"line_num"`
 }
 
 func (s *server) ServeJumpToDef(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-
-	response := RequestLangServer(s, &request)
-
-	replyJSON(ctx, w, 200, &gotoDefResponse{
-		Success:    true
-		FilePath:   response.assignmentFilePath
-		LineNumber: response.assignmentLineNum
+	RequestLangServer(s, &GotoDefRequest{
+		FilePath: "hello",
+		Row:      1,
+		Col:      1,
 	})
+
+	//replyJSON(ctx, w, 200, &gotoDefResponse{
+	//	Success:    true,
+	//	FilePath:   response.assignmentFilePath,
+	//	LineNumber: response.assignmentLineNum,
+	//})
 }
 
 type handler func(c context.Context, w http.ResponseWriter, r *http.Request)
@@ -304,10 +306,9 @@ func New(cfg *config.Config) (http.Handler, error) {
 	m.Add("GET", "/opensearch.xml", srv.Handler(srv.ServeOpensearch))
 	m.Add("GET", "/", srv.Handler(srv.ServeRoot))
 
-	m.Add("GET", "/gotodef/", srv.Handler(srv.ServeJumpToDef))
-
 	m.Add("GET", "/api/v1/search/:backend", srv.Handler(srv.ServeAPISearch))
 	m.Add("GET", "/api/v1/search/", srv.Handler(srv.ServeAPISearch))
+	m.Add("GET", "/api/v1/langserver/jumptodef/", srv.Handler(srv.ServeJumpToDef))
 
 	var h http.Handler = m
 
