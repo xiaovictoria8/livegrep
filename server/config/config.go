@@ -60,6 +60,7 @@ type Config struct {
 type IndexConfig struct {
 	Name         string       `json:"name"`
 	Repositories []RepoConfig `json:"repositories"`
+	LangServers  []LangServer `json:"lang_servers"`
 }
 
 type RepoConfig struct {
@@ -67,4 +68,9 @@ type RepoConfig struct {
 	Name      string            `json:"name"`
 	Revisions []string          `json:"revisions"`
 	Metadata  map[string]string `json:"metadata"`
+}
+
+type LangServer struct {
+	Port       int      `json:"port"`
+	Extensions []string `json:"extensions"`
 }

@@ -18,6 +18,7 @@ import (
 	"github.com/livegrep/livegrep/server/log"
 	"github.com/livegrep/livegrep/server/reqid"
 	"github.com/livegrep/livegrep/server/templates"
+	"strings"
 )
 
 type Templates struct {
@@ -94,6 +95,16 @@ func (s *server) ServeFile(ctx context.Context, w http.ResponseWriter, r *http.R
 	if commit == "" {
 		commit = "HEAD"
 	}
+	langServers := s.config.IndexConfig.LangServers
+	var langServerPorts []int
+	for _, s := range langServers {
+		for _, extension := range s.Extensions {
+			if strings.HasSuffix(path, extension) {
+				langServerPorts = append(langServerPorts, s.Port)
+				break
+			}
+		}
+	}
 
 	if len(s.repos) == 0 {
 		http.Error(w, "File browsing not enabled", 404)
@@ -106,7 +117,7 @@ func (s *server) ServeFile(ctx context.Context, w http.ResponseWriter, r *http.R
 		return
 	}
 
-	data, err := buildFileData(path, repo, commit)
+	data, err := buildFileData(path, repo, commit, langServerPorts)
 	if err != nil {
 		http.Error(w, "Error reading file", 500)
 		return

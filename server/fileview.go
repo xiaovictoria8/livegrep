@@ -172,7 +172,7 @@ func buildDirectoryListEntry(treeEntry gitTreeEntry, pathFromRoot string, repo c
 	}
 }
 
-func buildFileData(relativePath string, repo config.RepoConfig, commit string) (*fileViewerContext, error) {
+func buildFileData(relativePath string, repo config.RepoConfig, commit string, langServersPorts []int) (*fileViewerContext, error) {
 	cleanPath := path.Clean(relativePath)
 	if cleanPath == "." {
 		cleanPath = ""
