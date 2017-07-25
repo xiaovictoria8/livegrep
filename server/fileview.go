@@ -56,12 +56,13 @@ type directoryListEntry struct {
 }
 
 type fileViewerContext struct {
-	PathSegments   []breadCrumbEntry
-	Repo           config.RepoConfig
-	Commit         string
-	DirContent     *directoryContent
-	FileContent    *sourceFileContent
-	ExternalDomain string
+	PathSegments        []breadCrumbEntry
+	Repo                config.RepoConfig
+	Commit              string
+	LanguageServerPorts []int
+	DirContent          *directoryContent
+	FileContent         *sourceFileContent
+	ExternalDomain      string
 }
 
 type sourceFileContent struct {
@@ -171,7 +172,7 @@ func buildDirectoryListEntry(treeEntry gitTreeEntry, pathFromRoot string, repo c
 	}
 }
 
-func buildFileData(relativePath string, repo config.RepoConfig, commit string) (*fileViewerContext, error) {
+func buildFileData(relativePath string, repo config.RepoConfig, commit string, langServersPorts []int) (*fileViewerContext, error) {
 	cleanPath := path.Clean(relativePath)
 	if cleanPath == "." {
 		cleanPath = ""
@@ -226,11 +227,12 @@ func buildFileData(relativePath string, repo config.RepoConfig, commit string) (
 	}
 
 	return &fileViewerContext{
-		PathSegments:   segments,
-		Repo:           repo,
-		Commit:         commit,
-		DirContent:     dirContent,
-		FileContent:    fileContent,
-		ExternalDomain: externalDomain,
+		PathSegments:        segments,
+		Repo:                repo,
+		Commit:              commit,
+		LanguageServerPorts: langServersPorts,
+		DirContent:          dirContent,
+		FileContent:         fileContent,
+		ExternalDomain:      externalDomain,
 	}, nil
 }
