@@ -71,6 +71,6 @@ type RepoConfig struct {
 }
 
 type LangServer struct {
-	Port       int      `json:"port"`
+	Address    string   `json:"address"`
 	Extensions []string `json:"extensions"`
 }

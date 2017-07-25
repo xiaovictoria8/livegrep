@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"path"
+	"strings"
 	texttemplate "text/template"
 	"time"
 
@@ -220,6 +221,29 @@ func (s *server) ServeOpensearch(ctx context.Context, w http.ResponseWriter, r *
 	w.Write(body)
 }
 
+type GotoDefRequest struct {
+	FilePath string `json:"file_path"`
+	Row      int32  `json:"row"`
+	Col      int32  `json:"col"`
+}
+
+type GotoDefResponse struct {
+	Success    bool   `json:"success"`
+	FilePath   string `json:"file_path"`
+	LineNumber int32  `json:"line_num"`
+}
+
+func (s *server) ServeJumpToDef(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+
+	response := RequestLangServer(s, &request)
+
+	replyJSON(ctx, w, 200, &gotoDefResponse{
+		Success:    true
+		FilePath:   response.assignmentFilePath
+		LineNumber: response.assignmentLineNum
+	})
+}
+
 type handler func(c context.Context, w http.ResponseWriter, r *http.Request)
 
 const RequestTimeout = 8 * time.Second
@@ -278,6 +302,8 @@ func New(cfg *config.Config) (http.Handler, error) {
 	m.Add("GET", "/help", srv.Handler(srv.ServeHelp))
 	m.Add("GET", "/opensearch.xml", srv.Handler(srv.ServeOpensearch))
 	m.Add("GET", "/", srv.Handler(srv.ServeRoot))
+
+	m.Add("GET", "/gotodef/", srv.Handler(srv.ServeJumpToDef))
 
 	m.Add("GET", "/api/v1/search/:backend", srv.Handler(srv.ServeAPISearch))
 	m.Add("GET", "/api/v1/search/", srv.Handler(srv.ServeAPISearch))
