@@ -3,7 +3,6 @@ package server
 import (
 	"fmt"
 	"net/rpc/jsonrpc"
-
 	"github.com/livegrep/livegrep/server/config"
 	"strings"
 )
@@ -78,16 +77,16 @@ func InitLangServer(langServer config.LangServer, repoConfig config.RepoConfig) 
 	return true
 }
 
-func getLangServerFromFileExt(repo *RepoConfig, clientRequest *GotoDefRequest) LangServer {
-	func normalizedExt(path string) string {
+func getLangServerFromFileExt(repo config.RepoConfig, clientRequest *GotoDefRequest) *config.LangServer {
+	normalizedExt := func(path string) string {
 		split := strings.Split(path, ".")
 		ext := split[len(split) - 1]
 		return strings.ToLower(strings.TrimSpace(ext))
 	}
-	for _, langServer in range repo.LangServers {
-		for _, ext in range langServer.Extensions {
+	for _, langServer := range repo.LangServers {
+		for _, ext := range langServer.Extensions {
 			if normalizedExt(clientRequest.FilePath) == normalizedExt(ext) {
-				return langServer
+				return &langServer
 			}
 		}
 	}
@@ -96,7 +95,7 @@ func getLangServerFromFileExt(repo *RepoConfig, clientRequest *GotoDefRequest) L
 
 func RequestLangServer(s *server, clientRequest *GotoDefRequest) {
 
-	langServer := getLangServerFromFileExt(s.repos[clientRequest.Repo])
+	langServer := getLangServerFromFileExt(s.repos[clientRequest.Repo], clientRequest)
 
 	address := langServer.Address
 	fmt.Println(address)
