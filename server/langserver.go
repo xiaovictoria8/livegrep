@@ -1,8 +1,20 @@
 package server
 
 import (
+import (
+	"net/rpc"
+	"net/rpc/jsonrpc"
+	"fmt"
+)
+<<<<<<< HEAD
 	"net/rpc/jsonrpc"
 	"net/rpc"
+=======
+	"fmt"
+	"net/rpc/jsonrpc"
+	"github.com/livegrep/livegrep/server/config"
+	"strings"
+>>>>>>> 99aca14fd57176f730fb3afd17a647efe10973ed
 )
 
 //type requestMessage struct {
