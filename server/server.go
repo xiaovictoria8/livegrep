@@ -12,7 +12,7 @@ import (
 	"golang.org/x/net/context"
 
 	"github.com/bmizerany/pat"
-	"github.com/honeycombio/libhoney-go"
+	libhoney "github.com/honeycombio/libhoney-go"
 
 	"github.com/livegrep/livegrep/server/config"
 	"github.com/livegrep/livegrep/server/log"
@@ -222,6 +222,7 @@ func (s *server) ServeOpensearch(ctx context.Context, w http.ResponseWriter, r *
 }
 
 type GotoDefRequest struct {
+	Repo     string `json:"repo"`
 	FilePath string `json:"file_path"`
 	Row      int    `json:"row"`
 	Col      int    `json:"col"`
