@@ -31,7 +31,7 @@
       {{end}}
       {{with .FileContent}}
       <div class="file-content">
-        <code id="source-code" class="code {{.Language}}">{{.Content}}</code>
+        <code id="source-code" class="code {{.Language}}">{{$contentLines := split .Content "\n" }}{{range $index, $line := $contentLines}}<span data-row="{{toLineNum $index}}">{{$line}}</br></span>{{end}}</code> 
         <!--
         NOTE: The reason the line number links are after the code block above is because
         they take a significant amount of time to render for large files. If we keep
@@ -71,6 +71,7 @@
   // Distasteful. Someday pass this to the fileview code more cleanly.
   window.repoInfo = {{.Repo}};
   window.commit = {{.Commit}};
+  window.filePath = {{.FilePath}}
 </script>
 <script language="javascript" type="text/javascript" src="/assets/js/3d/highlight.pack.js"></script>
 <script language="javascript" type="text/javascript" src="/assets/js/fileview.js"></script>

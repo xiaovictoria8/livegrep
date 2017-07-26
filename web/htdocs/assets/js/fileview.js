@@ -2,8 +2,11 @@
   var KeyCodes = {
     ESCAPE: 27,
     ENTER: 13,
-    SLASH_OR_QUESTION_MARK: 191
+    SLASH_OR_QUESTION_MARK: 191,
+    COMMAND: 91,
   };
+
+  let isCmdDown = false;
 
   function getSelectedText() {
     return window.getSelection ? window.getSelection().toString() : null;
@@ -265,11 +268,31 @@
         if(!$(event.target).is('input,textarea')) {
           processKeyEvent(event);
         }
+
+        if ( event.which === KeyCodes.COMMAND) {
+          isCmdDown = true;
+        }
+      });
+
+      $(document).on('keyup', function(event) {
+        if ( event.which === KeyCodes.COMMAND) {
+          isCmdDown = false;
+        }
+      });
+
+      // if cmd + click is found, trigger jump to definition 
+      $(document).on('click', function(event) {
+        if ( isCmdDown ) {
+          const row = $(event.target).data("row");
+          const col = document.getSelection().baseOffset;
+          xhttp = new XMLHttpRequest()
+          xhttp.open("GET", "/gotodef?file_path=" + window.filePath + "&row=" + row + "&col=" + col);
+        }
       });
 
       initializeActionButtons($('.header .header-actions'));
     }
-
+ 
     // The native browser handling of hashes in the location is to scroll
     // to the element that has a name matching the id. We want to prevent
     // this since we want to take control over scrolling ourselves, and the

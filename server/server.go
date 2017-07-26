@@ -117,6 +117,7 @@ func (s *server) ServeFile(ctx context.Context, w http.ResponseWriter, r *http.R
 		http.Error(w, err.Error(), 500)
 		return
 	}
+
 	s.renderPage(w, &page{
 		Title:         "file",
 		IncludeHeader: false,
