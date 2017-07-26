@@ -34,6 +34,7 @@ type server struct {
 	bk      map[string]*Backend
 	bkOrder []string
 	repos   map[string]config.RepoConfig
+	langsrv map[string]LangServerClient
 	inner   http.Handler
 	T       Templates
 	Layout  *template.Template
@@ -234,11 +235,11 @@ type GotoDefResponse struct {
 
 func (s *server) ServeJumpToDef(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	fmt.Println("ServeJumpToDef")
-	RequestLangServer(s, &GotoDefRequest{
-		FilePath: "mypy/mypy/erasetype.py",
-		Row:      25,
-		Col:      16,
-	})
+	//RequestLangServer(s, &GotoDefRequest{
+	//	FilePath: "mypy/mypy/erasetype.py",
+	//	Row:      25,
+	//	Col:      16,
+	//})
 
 	//replyJSON(ctx, w, 200, &gotoDefResponse{
 	//	Success:    true,
@@ -267,9 +268,10 @@ func (s *server) Handler(f func(c context.Context, w http.ResponseWriter, r *htt
 
 func New(cfg *config.Config) (http.Handler, error) {
 	srv := &server{
-		config: cfg,
-		bk:     make(map[string]*Backend),
-		repos:  make(map[string]config.RepoConfig),
+		config:  cfg,
+		bk:      make(map[string]*Backend),
+		repos:   make(map[string]config.RepoConfig),
+		langsrv: make(map[string]LangServerClient),
 	}
 	srv.loadTemplates()
 
@@ -292,13 +294,26 @@ func New(cfg *config.Config) (http.Handler, error) {
 	}
 
 	for _, r := range srv.config.IndexConfig.Repositories {
-		langServers := make([]config.LangServer, 0)
+		//langServers := make([]config.LangServer, 0)
 		for _, langServer := range r.LangServers {
-			if InitLangServer(langServer, r) {
-				langServers = append(langServers, langServer)
+			//if InitLangServer(langServer, r) {
+			//	langServers = append(langServers, langServer)
+			//}
+			client, err := CreateLangServerClient(langServer.Address)
+			if err != nil {
+				panic(err)
 			}
+
+			var initResult InitializeResult
+			initResult, err = client.Initialize(InitializeParams{
+				ProcessId: nil,
+				RootUri: r.Path,
+				Capabilities: ClientCapabilities{},
+			})
+			println(initResult)
+			srv.langsrv[langServer.Address] = client
 		}
-		r.LangServers = langServers
+		//r.LangServers = langServers
 		srv.repos[r.Name] = r
 
 	}
