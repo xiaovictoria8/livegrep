@@ -286,9 +286,20 @@
           const row = $(event.target).data("row");
           const col = document.getSelection().baseOffset;
           xhttp = new XMLHttpRequest();
-          xhttp.open("GET", "/api/v1/langserver/jumptodef?file_path=" + window.filePath + "&row=" + row + "&col=" + col);
+          xhttp.onreadystatechange = function() {
+            if (this.status == 200 && this.responseText) {
+              console.log("lol: " + this.responseText);
+              const resp = JSON.parse(this.responseText);
+              console.log("replace url");
+              if (resp.success) {
+                window.location.replace(resp.url);
+              }
+            }
+          }
+
+          xhttp.open("GET", "/api/v1/langserver/jumptodef?repo_name=" + window.repoInfo.name + "&file_path=" + window.filePath + "&row=" + row + "&col=" + col);
           xhttp.send()
-          console.log("sent ajax request with: " + "/api/v1/langserver/jumptodef?file_path=" + window.filePath + "&row=" + row + "&col=" + col);
+          console.log("sent ajax request with: " + "/api/v1/langserver/jumptodef?repo_name=" + window.repoInfo.name + "&file_path=" + window.filePath + "&row=" + row + "&col=" + col);
         }
       });
 

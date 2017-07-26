@@ -21,6 +21,7 @@ import (
 )
 
 func replyJSON(ctx context.Context, w http.ResponseWriter, status int, obj interface{}) {
+	fmt.Printf("obj: %v", obj)
 	w.WriteHeader(status)
 	enc := json.NewEncoder(w)
 	if err := enc.Encode(obj); err != nil {

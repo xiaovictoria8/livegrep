@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"path"
+	"strconv"
 	texttemplate "text/template"
 	"time"
 
@@ -39,6 +40,18 @@ type server struct {
 	Layout  *template.Template
 
 	honey *libhoney.Builder
+}
+
+type GotoDefRequest struct {
+	RepoName string `json:"repo_name`
+	FilePath string `json:"file_path"`
+	Row      int    `json:"row"`
+	Col      int    `json:"col"`
+}
+
+type GotoDefResponse struct {
+	Success bool   `json:"success"`
+	URL     string `json:"url"`
 }
 
 func (s *server) loadTemplates() {
@@ -220,32 +233,31 @@ func (s *server) ServeOpensearch(ctx context.Context, w http.ResponseWriter, r *
 	w.Write(body)
 }
 
-type GotoDefRequest struct {
-	FilePath string `json:"file_path"`
-	Row      int    `json:"row"`
-	Col      int    `json:"col"`
-}
-
-type GotoDefResponse struct {
-	Success    bool   `json:"success"`
-	FilePath   string `json:"file_path"`
-	LineNumber int    `json:"line_num"`
-}
-
 func (s *server) ServeJumpToDef(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	params := r.URL.Query()
 	fmt.Println("ServeJumpToDef")
-	fmt.Printf("r.URL.Queries(): %v", r.URL.Queries())
-	// RequestLangServer(s, &GotoDefRequest{
-	// 	FilePath: "server/server.go",
-	// 	Row:      25,
-	// 	Col:      16,
-	// })
+	fmt.Printf("r.URL.Query(): %v\n", r.URL.Query())
 
-	//replyJSON(ctx, w, 200, &gotoDefResponse{
-	//	Success:    true,
-	//	FilePath:   response.assignmentFilePath,
-	//	LineNumber: response.assignmentLineNum,
-	//})
+	if len(params["repo_name"]) == 1 && len(params["file_path"]) == 1 && len(params["row"]) == 1 && len(params["col"]) == 1 {
+		// row, _ := strconv.Atoi(params["row"][0])
+		// col, _ := strconv.Atoi(params["col"][0])
+		repoName := params["repo_name"][0]
+
+		// TODO(xiaov): uncomment this once langserver actually works
+		// RequestLangServer(s, &GotoDefRequest{
+		//  RepoName: repo_name,
+		// 	FilePath: params["file_path"][0],
+		// 	Row:      row,
+		// 	Col:      col,
+		// })
+
+		filePath := "server/templates.go"
+		lineNum := 2
+		replyJSON(ctx, w, 200, &GotoDefResponse{
+			Success: true,
+			URL:     "/view/" + repoName + "/" + filePath + "#L" + strconv.Itoa(lineNum),
+		})
+	}
 }
 
 type handler func(c context.Context, w http.ResponseWriter, r *http.Request)
