@@ -2,6 +2,7 @@ package config
 
 import (
 	"html/template"
+	"net/rpc"
 )
 
 type Backend struct {
@@ -60,7 +61,6 @@ type Config struct {
 type IndexConfig struct {
 	Name         string       `json:"name"`
 	Repositories []RepoConfig `json:"repositories"`
-	LangServers  []LangServer `json:"lang_servers"`
 }
 
 type RepoConfig struct {
@@ -71,7 +71,9 @@ type RepoConfig struct {
 	LangServers []LangServer      `json:"lang_servers"`
 }
 
+
 type LangServer struct {
 	Address    string   `json:"address"`
 	Extensions []string `json:"extensions"`
+	RpcClient  *rpc.Client
 }

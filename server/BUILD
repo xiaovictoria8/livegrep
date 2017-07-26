@@ -8,7 +8,7 @@ go_library(
         "backend.go",
         "fileview.go",
         "json.go",
-        "lang_server.go",
+        "langserver.go",
         "query.go",
         "server.go",
         "templates.go",
