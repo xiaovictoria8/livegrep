@@ -311,7 +311,7 @@ func New(cfg *config.Config) (http.Handler, error) {
 				RootUri: r.Path,
 				Capabilities: ClientCapabilities{},
 			})
-			println(initResult)
+			fmt.Println(initResult)
 			srv.langsrv[langServer.Address] = client
 		}
 		//r.LangServers = langServers
