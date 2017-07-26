@@ -41,13 +41,13 @@ type ClientCapabilities struct{}
 type ServerCapabilities struct{}
 
 type InitializeParams struct {
-	ProcessId    *int               `'json':"processId"`
-	RootUri      string             `'json':"rootUri"`
-	Capabilities ClientCapabilities `'json':"capabilities"`
+	ProcessId    *int               `json:"processId"`
+	RootUri      string             `json:"rootUri"`
+	Capabilities ClientCapabilities `json:"capabilities"`
 }
 
 type InitializeResult struct {
-	Capabilities ServerCapabilities `'json':"capabilities"`
+	Capabilities ServerCapabilities `json:"capabilities"`
 }
 
 //var id int = 0
