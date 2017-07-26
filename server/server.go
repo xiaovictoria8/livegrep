@@ -222,8 +222,8 @@ func (s *server) ServeOpensearch(ctx context.Context, w http.ResponseWriter, r *
 
 type GotoDefRequest struct {
 	FilePath string `json:"file_path"`
-	Row      int  `json:"row"`
-	Col      int  `json:"col"`
+	Row      int    `json:"row"`
+	Col      int    `json:"col"`
 }
 
 type GotoDefResponse struct {
@@ -233,10 +233,11 @@ type GotoDefResponse struct {
 }
 
 func (s *server) ServeJumpToDef(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	fmt.Println("ServeJumpToDef")
 	RequestLangServer(s, &GotoDefRequest{
-		FilePath: "hello",
-		Row:      1,
-		Col:      1,
+		FilePath: "mypy/mypy/erasetype.py",
+		Row:      25,
+		Col:      16,
 	})
 
 	//replyJSON(ctx, w, 200, &gotoDefResponse{
@@ -291,7 +292,15 @@ func New(cfg *config.Config) (http.Handler, error) {
 	}
 
 	for _, r := range srv.config.IndexConfig.Repositories {
+		langServers := make([]config.LangServer, 0)
+		for _, langServer := range r.LangServers {
+			if InitLangServer(langServer, r) {
+				langServers = append(langServers, langServer)
+			}
+		}
+		r.LangServers = langServers
 		srv.repos[r.Name] = r
+
 	}
 
 	m := pat.New()
