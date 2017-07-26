@@ -56,10 +56,7 @@ type directoryListEntry struct {
 }
 
 type fileViewerContext struct {
-<<<<<<< HEAD
 	FilePath       string
-=======
->>>>>>> Do not pass langserver info to javascript UI
 	PathSegments   []breadCrumbEntry
 	Repo           config.RepoConfig
 	Commit         string

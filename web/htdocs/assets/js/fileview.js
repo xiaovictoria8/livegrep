@@ -287,6 +287,7 @@
           const col = document.getSelection().baseOffset;
           xhttp = new XMLHttpRequest()
           xhttp.open("GET", "/gotodef?file_path=" + window.filePath + "&row=" + row + "&col=" + col);
+          console.log("sent ajax request with: " + "/gotodef?file_path=" + window.filePath + "&row=" + row + "&col=" + col);
         }
       });
 
