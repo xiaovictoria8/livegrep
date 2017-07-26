@@ -233,6 +233,19 @@ func (s *server) ServeOpensearch(ctx context.Context, w http.ResponseWriter, r *
 	w.Write(body)
 }
 
+type GotoDefRequest struct {
+	Repo     string `json:"repo"`
+	FilePath string `json:"file_path"`
+	Row      int    `json:"row"`
+	Col      int    `json:"col"`
+}
+
+type GotoDefResponse struct {
+	Success    bool   `json:"success"`
+	FilePath   string `json:"file_path"`
+	LineNumber int    `json:"line_num"`
+}
+
 func (s *server) ServeJumpToDef(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	params := r.URL.Query()
 	fmt.Println("ServeJumpToDef")
