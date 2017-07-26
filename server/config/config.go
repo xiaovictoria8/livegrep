@@ -64,10 +64,11 @@ type IndexConfig struct {
 }
 
 type RepoConfig struct {
-	Path      string            `json:"path"`
-	Name      string            `json:"name"`
-	Revisions []string          `json:"revisions"`
-	Metadata  map[string]string `json:"metadata"`
+	Path        string            `json:"path"`
+	Name        string            `json:"name"`
+	Revisions   []string          `json:"revisions"`
+	Metadata    map[string]string `json:"metadata"`
+	LangServers []LangServer      `json:"lang_servers"`
 }
 
 type LangServer struct {

@@ -12,7 +12,7 @@ import (
 	"golang.org/x/net/context"
 
 	"github.com/bmizerany/pat"
-	"github.com/honeycombio/libhoney-go"
+	libhoney "github.com/honeycombio/libhoney-go"
 
 	"github.com/livegrep/livegrep/server/config"
 	"github.com/livegrep/livegrep/server/log"
@@ -117,7 +117,6 @@ func (s *server) ServeFile(ctx context.Context, w http.ResponseWriter, r *http.R
 		http.Error(w, err.Error(), 500)
 		return
 	}
-
 	s.renderPage(w, &page{
 		Title:         "file",
 		IncludeHeader: false,
@@ -223,8 +222,8 @@ func (s *server) ServeOpensearch(ctx context.Context, w http.ResponseWriter, r *
 
 type GotoDefRequest struct {
 	FilePath string `json:"file_path"`
-	Row      int  `json:"row"`
-	Col      int  `json:"col"`
+	Row      int    `json:"row"`
+	Col      int    `json:"col"`
 }
 
 type GotoDefResponse struct {
@@ -234,11 +233,13 @@ type GotoDefResponse struct {
 }
 
 func (s *server) ServeJumpToDef(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-	RequestLangServer(s, &GotoDefRequest{
-		FilePath: "hello",
-		Row:      1,
-		Col:      1,
-	})
+	fmt.Println("ServeJumpToDef")
+	fmt.Printf("r.URL.Queries(): %v", r.URL.Queries())
+	// RequestLangServer(s, &GotoDefRequest{
+	// 	FilePath: "server/server.go",
+	// 	Row:      25,
+	// 	Col:      16,
+	// })
 
 	//replyJSON(ctx, w, 200, &gotoDefResponse{
 	//	Success:    true,
@@ -292,7 +293,15 @@ func New(cfg *config.Config) (http.Handler, error) {
 	}
 
 	for _, r := range srv.config.IndexConfig.Repositories {
+		langServers := make([]config.LangServer, 0)
+		for _, langServer := range r.LangServers {
+			if InitLangServer(langServer, r) {
+				langServers = append(langServers, langServer)
+			}
+		}
+		r.LangServers = langServers
 		srv.repos[r.Name] = r
+
 	}
 
 	m := pat.New()
@@ -308,7 +317,7 @@ func New(cfg *config.Config) (http.Handler, error) {
 
 	m.Add("GET", "/api/v1/search/:backend", srv.Handler(srv.ServeAPISearch))
 	m.Add("GET", "/api/v1/search/", srv.Handler(srv.ServeAPISearch))
-	m.Add("GET", "/api/v1/langserver/jumptodef/", srv.Handler(srv.ServeJumpToDef))
+	m.Add("GET", "/api/v1/langserver/jumptodef", srv.Handler(srv.ServeJumpToDef))
 
 	var h http.Handler = m
 

@@ -285,9 +285,10 @@
         if ( isCmdDown ) {
           const row = $(event.target).data("row");
           const col = document.getSelection().baseOffset;
-          xhttp = new XMLHttpRequest()
-          xhttp.open("GET", "/gotodef?file_path=" + window.filePath + "&row=" + row + "&col=" + col);
-          console.log("sent ajax request with: " + "/gotodef?file_path=" + window.filePath + "&row=" + row + "&col=" + col);
+          xhttp = new XMLHttpRequest();
+          xhttp.open("GET", "/api/v1/langserver/jumptodef?file_path=" + window.filePath + "&row=" + row + "&col=" + col);
+          xhttp.send()
+          console.log("sent ajax request with: " + "/api/v1/langserver/jumptodef?file_path=" + window.filePath + "&row=" + row + "&col=" + col);
         }
       });
 
