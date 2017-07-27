@@ -3,6 +3,8 @@ package server
 import (
 	"net/rpc/jsonrpc"
 	"net/rpc"
+	"github.com/livegrep/livegrep/server/config"
+	"strings"
 )
 
 //type requestMessage struct {
@@ -83,6 +85,22 @@ type InitializeResult struct {
 //	return true
 //}
 
+func getLangServerFromFileExt(repo config.RepoConfig, clientRequest *GotoDefRequest) *config.LangServer {
+	normalizedExt := func(path string) string {
+		split := strings.Split(path, ".")
+		ext := split[len(split) - 1]
+		return strings.ToLower(strings.TrimSpace(ext))
+	}
+	for _, langServer := range repo.LangServers {
+		for _, ext := range langServer.Extensions {
+			if normalizedExt(clientRequest.FilePath) == normalizedExt(ext) {
+				return &langServer
+			}
+		}
+	}
+	return nil
+}
+
 type LangServerClient interface {
 	Initialize(params InitializeParams) (InitializeResult, error)
 }
@@ -108,6 +126,42 @@ func (c *langServerClientImpl) Initialize(params InitializeParams) (result Initi
 	err = c.rpcClient.Call("initialize", params, &result)
 	return
 }
+
+
+//func RequestLangServer(s *server, clientRequest *GotoDefRequest) {
+//
+//	langServer := getLangServerFromFileExt(s.repos[clientRequest.Repo], clientRequest)
+//
+//	address := langServer.Address
+//	fmt.Println(address)
+//	rpcClient, err := jsonrpc.Dial("tcp", address)
+//	if err != nil {
+//		panic(err)
+//	}
+//
+//	fmt.Println("dialed")
+//
+//	id++
+//	m := requestMessage{
+//		JsonRpc: "3.0",
+//		Id:      id,
+//		Method:  "textDocument/definition",
+//		Params: textDocumentPositionParams{
+//			TextDocument: textDocumentIdentifier{
+//				Uri: clientRequest.FilePath,
+//			},
+//			Position: position{
+//				Line:      clientRequest.Row,
+//				Character: clientRequest.Col,
+//			},
+//		},
+//	}
+//	fmt.Printf("%+v\n", m)
+//	var resp location
+//	rpcClient.Call("", m, &resp)
+//
+//	fmt.Println(resp)
+//}
 
 //func RequestLangServer(s *server, clientRequest *GotoDefRequest) {
 //
