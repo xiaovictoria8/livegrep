@@ -21,6 +21,8 @@ import (
 	"github.com/livegrep/livegrep/server/log"
 	"github.com/livegrep/livegrep/server/reqid"
 	"github.com/livegrep/livegrep/server/templates"
+	"path/filepath"
+	"strings"
 )
 
 type Templates struct {
@@ -246,7 +248,7 @@ func (s *server) ServeJumpToDef(ctx context.Context, w http.ResponseWriter, r *h
 		repoName := params["repo_name"][0]
 
 		//uri := s.config.IndexConfig.Repositories[0].Path
-		uri := params["file_path"][0]
+		uri := s.config.IndexConfig.Repositories[0].Path + "/" + params["file_path"][0]
 		params := lngs.TextDocumentPositionParams{TextDocument: lngs.TextDocumentIdentifier{URI: uri}, Position: lngs.Position{Line: row, Character: col}}
 
 		//TODO (anurag): initialize a langServerClientImpl and call the function below on it
@@ -262,12 +264,17 @@ func (s *server) ServeJumpToDef(ctx context.Context, w http.ResponseWriter, r *h
 		// Or probably you should just initialize one instance and store it on the server, discuss with stas
 		// locations, _ := JumpToDef(input)
 
-		filePath := locations[0].URI
+		targetPath := strings.Replace(locations[0].URI, "file://", "", 1)
 		lineNum := locations[0].TextRange.Start.Line
+		relPath, _ := filepath.Rel(s.config.IndexConfig.Repositories[0].Path, targetPath)
+
+		fmt.Println(targetPath)
+		fmt.Println(s.config.IndexConfig.Repositories[0].Path + "/")
+		fmt.Println(relPath)
 
 		//TODO (xiaov): add response with error code if no def is found
 		replyJSON(ctx, w, 200, &GotoDefResponse{
-			URL: "/view/" + repoName + "/" + filePath + "#L" + strconv.Itoa(lineNum),
+			URL: "/view/" + repoName + "/" + relPath + "#L" + strconv.Itoa(lineNum),
 		})
 	}
 }
