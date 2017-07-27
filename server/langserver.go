@@ -23,15 +23,39 @@ type InitializeResult struct {
 	Capabilities ServerCapabilities `json:"capabilities"`
 }
 
-func getLangServerFromFileExt(repo config.RepoConfig, clientRequest *GotoDefRequest) *config.LangServer {
+type TextDocumentIdentifier struct {
+	Uri string `json:"uri"`
+}
+
+type Position struct {
+	Line      int `json:"line"`
+	Character int `json:"character"`
+}
+
+type TextDocumentPositionParams struct {
+	TextDocument TextDocumentIdentifier `json:"textDocument"`
+	Position     Position               `json:"position"`
+}
+
+type RangeType struct {
+	Start Position `json:"start"`
+	End   Position `json:"end"`
+}
+
+type Location struct {
+	Uri       string    `json:"uri"`
+	TextRange RangeType `json:"range"`
+}
+
+func getLangServerFromFileExt(repo config.RepoConfig, filePath string) *config.LangServer {
 	normalizedExt := func(path string) string {
 		split := strings.Split(path, ".")
-		ext := split[len(split) - 1]
+		ext := split[len(split)-1]
 		return strings.ToLower(strings.TrimSpace(ext))
 	}
 	for _, langServer := range repo.LangServers {
 		for _, ext := range langServer.Extensions {
-			if normalizedExt(clientRequest.FilePath) == normalizedExt(ext) {
+			if normalizedExt(filePath) == normalizedExt(ext) {
 				return &langServer
 			}
 		}
@@ -41,11 +65,12 @@ func getLangServerFromFileExt(repo config.RepoConfig, clientRequest *GotoDefRequ
 
 type LangServerClient interface {
 	Initialize(params InitializeParams) (InitializeResult, error)
+	JumpToDef(params *TextDocumentPositionParams) (Location, error)
 }
 
 type langServerClientImpl struct {
 	rpcClient *jsonrpc2.Conn
-	ctx context.Context
+	ctx       context.Context
 }
 
 type responseHandler struct {
@@ -68,17 +93,25 @@ func CreateLangServerClient(address string) (client LangServerClient, err error)
 	rpcConn := jsonrpc2.NewConn(ctx, jsonrpc2.NewBufferedStream(conn, codec), handler)
 	client = &langServerClientImpl{
 		rpcClient: rpcConn,
-		ctx: ctx,
+		ctx:       ctx,
 	}
 	fmt.Println("done creating lang server client")
-	return
+	return client, nil
 }
 
 func (c *langServerClientImpl) Initialize(params InitializeParams) (result InitializeResult, err error) {
 	fmt.Println("Initialize")
 	err = c.rpcClient.Call(c.ctx, "initialize", params, &result)
 	fmt.Println("Done initializing")
-	return
+	if err != nil {
+		c.rpcClient.Call(c.ctx, "initialized", nil, nil)
+	}
+	return result, err
 }
 
-
+func (c *langServerClientImpl) JumpToDef(params *TextDocumentPositionParams) (result Location, err error) {
+	fmt.Println("GotoDefRequest")
+	err = c.rpcClient.Call(c.ctx, "textDocument/definition", params, &result)
+	fmt.Println("Done GotoDefRequest")
+	return result, err
+}

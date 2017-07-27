@@ -12,7 +12,7 @@ import (
 	"golang.org/x/net/context"
 
 	"github.com/bmizerany/pat"
-	libhoney "github.com/honeycombio/libhoney-go"
+	"github.com/honeycombio/libhoney-go"
 
 	"github.com/livegrep/livegrep/server/config"
 	"github.com/livegrep/livegrep/server/log"
@@ -221,12 +221,6 @@ func (s *server) ServeOpensearch(ctx context.Context, w http.ResponseWriter, r *
 	w.Write(body)
 }
 
-type GotoDefRequest struct {
-	Repo     string `json:"repo"`
-	FilePath string `json:"file_path"`
-	Row      int    `json:"row"`
-	Col      int    `json:"col"`
-}
 
 type GotoDefResponse struct {
 	Success    bool   `json:"success"`
@@ -236,11 +230,21 @@ type GotoDefResponse struct {
 
 func (s *server) ServeJumpToDef(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	fmt.Println("ServeJumpToDef")
-	//RequestLangServer(s, &GotoDefRequest{
-	//	FilePath: "mypy/mypy/erasetype.py",
-	//	Row:      25,
-	//	Col:      16,
+	// todo: fix
+	//langServer := s.langsrv["0.0.0.0:3141"]
+	//res, err := langServer.JumpToDef(&TextDocumentPositionParams{
+	//	TextDocument: TextDocumentIdentifier{
+	//		Uri: "mypy/erasetype.py",
+	//	},
+	//	Position: Position {
+	//		Line: 25,
+	//		Character: 16,
+	//	},
 	//})
+	//fmt.Println(res)
+	//if err != nil {
+	//	panic(err)
+	//}
 
 	//replyJSON(ctx, w, 200, &gotoDefResponse{
 	//	Success:    true,
