@@ -221,7 +221,6 @@ func (s *server) ServeOpensearch(ctx context.Context, w http.ResponseWriter, r *
 	w.Write(body)
 }
 
-
 type GotoDefResponse struct {
 	Success    bool   `json:"success"`
 	FilePath   string `json:"file_path"`
@@ -311,9 +310,11 @@ func New(cfg *config.Config) (http.Handler, error) {
 
 			var initResult InitializeResult
 			initResult, err = client.Initialize(InitializeParams{
-				ProcessId: nil,
-				RootUri: r.Path,
-				Capabilities: ClientCapabilities{},
+				ProcessId:        nil,
+				OriginalRootPath: r.Path,
+				RootPath:         r.Path,
+				RootUri:          r.Path,
+				Capabilities:     ClientCapabilities{},
 			})
 			fmt.Println(initResult)
 			srv.langsrv[langServer.Address] = client
