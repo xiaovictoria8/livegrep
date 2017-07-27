@@ -248,14 +248,55 @@
       xhttp = new XMLHttpRequest();
       xhttp.onreadystatechange = function() {
         if (this.status == 200 && this.responseText) {
-          const originalContent = $('#source-code').text();
-          const funcList = JSON.parse(this.responseText);
-          console.log("originalContent: " + originalContent);
-          for (let i = 0; i < funcList.lenght; i++) {
-            console.log(JSON.stringify(funcList[i]));
-          }
+
+          // the source code being displayed as an array of lines
+          const contentArr = $('#source-code').text().split("\n");
 
           console.log("this.responseText: " + this.responseText);
+          console.log("contentArr: " + JSON.stringify(contentArr));
+
+          const rangeList = JSON.parse(this.responseText)
+          const posList = []
+
+          for (let i = 0; i < rangeList.length; i++) {
+            let rangeObj = rangeList[i] 
+            posList.push({
+              "end": false,
+              "line": rangeObj.start.line - 1,
+              "character": rangeObj.start.character,
+            });
+            posList.push({
+              "end": true,
+              "line": rangeObj.end.line - 1,
+              "character": rangeObj.end.character,
+            });
+          }
+
+          console.log("unsorted posList: " + JSON.stringify(posList));
+
+          // sort backwards to maintain indices of symbols when adding span tags
+          posList.sort(
+            (a, b) => {
+              if (a.line < b.line) return 1;
+              else if (a.line > b.line) return -1;
+              else return b.character - a.character;
+            } 
+          )
+          console.log("sorted posList: " + JSON.stringify(posList));
+
+          for (let i = 0; i < posList.length; i++) {
+            const pos = posList[i];
+            const contentLine = contentArr[pos.line];
+            const span_tag = pos.end? "</span>" : "<span class='langserver-symbol' data-row=" + pos.line + " data-col=" + pos.character + ">";
+            contentArr[pos.line] = [contentLine.slice(0, pos.character), span_tag, contentLine.slice(pos.character)].join('');
+          
+            console.log("pos: " + JSON.stringify(pos));
+            console.log("contentLine: " + contentLine);
+            console.log("contentArr[pos.line]: " + contentArr[pos.line]);
+          }
+
+          $('#source-code').html(contentArr.join("\n"));
+          hljs.highlightBlock($('#source-code')[0]);
         }
       }
 
@@ -266,7 +307,7 @@
 
     function triggerJumpToDef(event) {
       const row = $(event.target).data("row") || $(event.target).parent().data("row");
-      const col = document.getSelection().baseOffset;
+      const col = $(event.target).data("col") || $(event.target).parent().data("col");
 
       xhttp = new XMLHttpRequest();
       xhttp.onreadystatechange = function() {
