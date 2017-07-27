@@ -241,19 +241,26 @@ func (s *server) ServeJumpToDef(ctx context.Context, w http.ResponseWriter, r *h
 	fmt.Printf("r.URL.Query(): %v\n", r.URL.Query())
 
 	if len(params["repo_name"]) == 1 && len(params["file_path"]) == 1 && len(params["row"]) == 1 && len(params["col"]) == 1 {
-		// row, _ := strconv.Atoi(params["row"][0])
-		// col, _ := strconv.Atoi(params["col"][0])
+		row, _ := strconv.Atoi(params["row"][0])
+		col, _ := strconv.Atoi(params["col"][0])
 		repoName := params["repo_name"][0]
 
-		// uri := s.config.IndexConfig.Repositories[0].Path
-		// input := lngs.TextDocumentPositionParams{TextDocument: lngs.TextDocumentIdentifier{URI: uri}, Position: lngs.Position{Line: row, Character: col}}
+		uri := s.config.IndexConfig.Repositories[0].Path
+		params := lngs.TextDocumentPositionParams{TextDocument: lngs.TextDocumentIdentifier{URI: uri}, Position: lngs.Position{Line: row, Character: col}}
 
 		//TODO (anurag): initialize a langServerClientImpl and call the function below on it
+		langServer := s.langsrv[GetLangServerFromFileExt(s.config.IndexConfig.Repositories[0], uri).Address]
+		locations, err := langServer.JumpToDef(&params)
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+
 		// Or probably you should just initialize one instance and store it on the server, discuss with stas
 		// locations, _ := JumpToDef(input)
 
-		filePath := "server/templates.go"
-		lineNum := 2
+		filePath := locations[0].URI
+		lineNum := locations[0].TextRange.Start.Line
 
 		//TODO (xiaov): add response with error code if no def is found
 		replyJSON(ctx, w, 200, &GotoDefResponse{

@@ -29,7 +29,7 @@ type InitializeResult struct {
 	Capabilities ServerCapabilities `json:"capabilities"`
 }
 
-func getLangServerFromFileExt(repo config.RepoConfig, filePath string) *config.LangServer {
+func GetLangServerFromFileExt(repo config.RepoConfig, filePath string) *config.LangServer {
 	normalizedExt := func(path string) string {
 		split := strings.Split(path, ".")
 		ext := split[len(split)-1]
@@ -96,4 +96,11 @@ func (c *langServerClientImpl) JumpToDef(params *lngs.TextDocumentPositionParams
 	err = c.rpcClient.Call(c.ctx, "textDocument/definition", params, &result)
 	fmt.Println("Done GotoDefRequest")
 	return result, err
+}
+
+func (c *langServerClientImpl) AllSymbols(params *lngs.DocumentSymbolParams) (result []lngs.SymbolInformation, err error) {
+	fmt.Println("Symbol Search")
+	err = c.rpcClient.Call(c.ctx, "textDocument/documentSymbol", params, &result)
+	fmt.Println("Symbol search done")
+	return
 }
