@@ -47,7 +47,7 @@ func getLangServerFromFileExt(repo config.RepoConfig, filePath string) *config.L
 
 type LangServerClient interface {
 	Initialize(params InitializeParams) (InitializeResult, error)
-	JumpToDef(params *lngs.TextDocumentPositionParams) (lngs.Location, error)
+	JumpToDef(params *lngs.TextDocumentPositionParams) ([]lngs.Location, error)
 }
 
 type langServerClientImpl struct {
@@ -91,7 +91,7 @@ func (c *langServerClientImpl) Initialize(params InitializeParams) (result Initi
 	return result, err
 }
 
-func (c *langServerClientImpl) JumpToDef(params *lngs.TextDocumentPositionParams) (result lngs.Location, err error) {
+func (c *langServerClientImpl) JumpToDef(params *lngs.TextDocumentPositionParams) (result []lngs.Location, err error) {
 	fmt.Println("GotoDefRequest")
 	err = c.rpcClient.Call(c.ctx, "textDocument/definition", params, &result)
 	fmt.Println("Done GotoDefRequest")

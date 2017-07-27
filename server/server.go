@@ -244,14 +244,11 @@ func (s *server) ServeJumpToDef(ctx context.Context, w http.ResponseWriter, r *h
 		// row, _ := strconv.Atoi(params["row"][0])
 		// col, _ := strconv.Atoi(params["col"][0])
 		repoName := params["repo_name"][0]
+		uri := s.config.RepoConfig.Path
+		fmt.Printf("uri: %v\n", uri)
+		input := lngs.TextDocumentPositionParams{TextDocument: lngs.TextDocumentIdentifier{URI: uri}, lngs.Position{Line: row, Character: col}}
 
-		//TODO(xiaov): uncomment this once langserver actually works
-		// RequestLangServer(s, &GotoDefRequest{
-		// 	RepoName: repo_name,
-		// 	FilePath: params["file_path"][0],
-		// 	Row:      row,
-		// 	Col:      col,
-		// })
+		locations, _ := JumpToDef(input)
 
 		filePath := "server/templates.go"
 		lineNum := 2
