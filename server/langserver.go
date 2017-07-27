@@ -51,6 +51,7 @@ func GetLangServerFromFileExt(repo config.RepoConfig, filePath string) *config.L
 type LangServerClient interface {
 	Initialize(params InitializeParams) (InitializeResult, error)
 	JumpToDef(params *lngs.TextDocumentPositionParams) ([]lngs.Location, error)
+	AllSymbols(params *lngs.DocumentSymbolParams) (result []lngs.SymbolInformation, err error)
 }
 
 type langServerClientImpl struct {
@@ -91,18 +92,18 @@ func (c *langServerClientImpl) Initialize(params InitializeParams) (result Initi
 	if err != nil {
 		c.rpcClient.Call(c.ctx, "initialized", nil, nil)
 	}
-	return result, err
+	return
 }
 
 func (c *langServerClientImpl) JumpToDef(params *lngs.TextDocumentPositionParams) (result []lngs.Location, err error) {
 	fmt.Println("GotoDefRequest")
 	err = c.rpcClient.Call(c.ctx, "textDocument/definition", params, &result)
 	fmt.Println("Done GotoDefRequest")
-	return result, err
+	return
 }
 
 func (c *langServerClientImpl) AllSymbols(params *lngs.DocumentSymbolParams) (result []lngs.SymbolInformation, err error) {
-	fmt.Println("Symbol Search")
+	fmt.Printf("Symbol Search %+v", params)
 	err = c.rpcClient.Call(c.ctx, "textDocument/documentSymbol", params, &result)
 	fmt.Println("Symbol search done")
 	return

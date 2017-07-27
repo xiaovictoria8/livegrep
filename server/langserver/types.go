@@ -4,12 +4,12 @@ type SymbolInformation struct {
 	Name          string   `json:"name"`
 	Kind          int      `json:"kind"`
 	Location      Location `json:"location"`
-	ContainerName string   `json:"container_name"`
+	ContainerName string   `json:"containerName"`
 }
 
 type Location struct {
 	URI       string `json:"uri"`
-	TextRange Range  `json:"text_range"`
+	Range Range  `json:"range"`
 }
 
 type Range struct {

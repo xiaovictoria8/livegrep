@@ -46,7 +46,7 @@ type server struct {
 }
 
 type GotoDefRequest struct {
-	RepoName string `json:"repo_name`
+	RepoName string `json:"repo_name"`
 	FilePath string `json:"file_path"`
 	Row      int    `json:"row"`
 	Col      int    `json:"col"`
@@ -274,28 +274,39 @@ func (s *server) ServeJumpToDef(ctx context.Context, w http.ResponseWriter, r *h
 
 func (s *server) ServeGetFunctions(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	params := r.URL.Query()
+	fmt.Println("ServerGetFunctions!")
+	filePaths := params["file_path"]
+	repoNames := params["repo_name"]
+	symbolRanges := []lngs.Range{}
 
-	if len(params["file_path"]) == 1 {
-		// filePath := params["file_path"]
-		//TODO (stas): convert filePath into the correct input for AllSymbols() and pass it in
-		// Also probably good to test to make sure my code below works
-		// input := nil
-
-		//TODO (stas): initialize a langServerClientImpl and call the function below on it
-		// Or probably you should just initialize one instance and store it on the server, discuss with anurag
-		// symList, _ := AllSymbols(input)
-		symList := []lngs.SymbolInformation{}
-
-		funcList := []lngs.Range{}
-		for _, item := range symList {
-			if item.Kind == 12 {
-				funcList = append(funcList, item.Location.TextRange)
+	if len(filePaths) == 1 && len(repoNames) == 1 {
+		filePath := filePaths[0]
+		repoConf, present := s.repos[repoNames[0]]
+		if present {
+			langServerConfig := GetLangServerFromFileExt(repoConf, filePath)
+			if langServerConfig != nil {
+				langServer := s.langsrv[langServerConfig.Address]
+				symList, err := langServer.AllSymbols(&lngs.DocumentSymbolParams{
+					TextDocument: lngs.TextDocumentIdentifier{
+						URI: path.Join(repoConf.Path, filePath),
+					},
+				})
+				if err != nil {
+					symbolRanges = []lngs.Range{}
+				} else {
+					for _, item := range symList {
+						symbolRanges = append(symbolRanges, item.Location.TextRange)
+					}
+				}
 			}
 		}
 
-		fmt.Printf("list: %v\n", funcList)
-
-		replyJSON(ctx, w, 200, funcList)
+	}
+	fmt.Printf("list: %v\n", symbolRanges)
+	if len(symbolRanges) > 0 {
+		replyJSON(ctx, w, 200, symbolRanges)
+	} else {
+		replyJSON(ctx, w, 500, nil)
 	}
 }
 
