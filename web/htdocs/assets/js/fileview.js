@@ -260,7 +260,7 @@
       }
 
       console.log("sending xhttp request /api/v1/langserver/get_functions?file_path=" + window.filePath);
-      xhttp.open("GET", "/api/v1/langserver/get_functions?file_path=" + window.filePath);
+      xhttp.open("GET", "/api/v1/langserver/get_functions?repo_name=" + window.repoInfo.name + "&file_path=" + window.filePath);
       xhttp.send()
     }
 
