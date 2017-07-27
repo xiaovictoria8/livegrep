@@ -245,10 +245,13 @@ func (s *server) ServeJumpToDef(ctx context.Context, w http.ResponseWriter, r *h
 		col, _ := strconv.Atoi(params["col"][0])
 		repoName := params["repo_name"][0]
 
-		uri := s.config.IndexConfig.Repositories[0].Path
+		//uri := s.config.IndexConfig.Repositories[0].Path
+		uri := params["file_path"][0]
 		params := lngs.TextDocumentPositionParams{TextDocument: lngs.TextDocumentIdentifier{URI: uri}, Position: lngs.Position{Line: row, Character: col}}
 
 		//TODO (anurag): initialize a langServerClientImpl and call the function below on it
+		fmt.Println("langserver", GetLangServerFromFileExt(s.config.IndexConfig.Repositories[0], uri))
+		fmt.Println("address", GetLangServerFromFileExt(s.config.IndexConfig.Repositories[0], uri).Address)
 		langServer := s.langsrv[GetLangServerFromFileExt(s.config.IndexConfig.Repositories[0], uri).Address]
 		locations, err := langServer.JumpToDef(&params)
 		if err != nil {

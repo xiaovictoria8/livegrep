@@ -30,6 +30,8 @@ type InitializeResult struct {
 }
 
 func GetLangServerFromFileExt(repo config.RepoConfig, filePath string) *config.LangServer {
+	fmt.Println("repo", repo)
+	fmt.Println("filepath", filePath)
 	normalizedExt := func(path string) string {
 		split := strings.Split(path, ".")
 		ext := split[len(split)-1]
@@ -37,6 +39,7 @@ func GetLangServerFromFileExt(repo config.RepoConfig, filePath string) *config.L
 	}
 	for _, langServer := range repo.LangServers {
 		for _, ext := range langServer.Extensions {
+			fmt.Println("ext", normalizedExt(filePath), normalizedExt(ext))
 			if normalizedExt(filePath) == normalizedExt(ext) {
 				return &langServer
 			}
