@@ -30,3 +30,8 @@ type TextDocumentPositionParams struct {
 type TextDocumentIdentifier struct {
 	URI string `json:"uri"`
 }
+
+type DocumentSymbolParams struct {
+	TextDocument TextDocumentIdentifier `json:"textDocument"`
+}
+
