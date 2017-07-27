@@ -242,9 +242,46 @@
       }
     }
 
+    function decorateFunctions() {
+      console.log("addLinksToFunctionSymbols");
+
+      xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function() {
+        if (this.status == 200 && this.responseText) {
+          // $('#source-code').html(this.responseText);
+
+          console.log("this.responseText: " + this.responseText);
+        }
+      }
+
+      console.log("sending xhttp request /api/v1/langserver/get_functions?file_path=" + window.filePath);
+      xhttp.open("GET", "/api/v1/langserver/get_functions?file_path=" + window.filePath);
+      xhttp.send()
+    }
+
+    function triggerJumpToDef(event) {
+      const row = $(event.target).data("row");
+      const col = document.getSelection().baseOffset;
+
+      xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function() {
+        if (this.status == 200 && this.responseText) {
+          const resp = JSON.parse(this.responseText);
+          window.location.replace(resp.url);
+        }
+      }
+
+      console.log("sending request to /api/v1/langserver/jumptodef?repo_name=" + window.repoInfo.name + "&file_path=" + window.filePath + "&row=" + row + "&col=" + col);
+      xhttp.open("GET", "/api/v1/langserver/jumptodef?repo_name=" + window.repoInfo.name + "&file_path=" + window.filePath + "&row=" + row + "&col=" + col);
+      xhttp.send()
+    }
+
     function initializePage() {
       // Initial range detection for when the page is loaded
       handleHashChange();
+
+      // send request to find and add appriopriate declarations for all function in code
+      decorateFunctions();
 
       // Allow shift clicking links to expand the highlight range
       lineNumberContainer.on('click', 'a', function(event) {
@@ -283,20 +320,7 @@
       // if cmd + click is found, trigger jump to definition 
       $(document).on('click', function(event) {
         if ( isCmdDown ) {
-          const row = $(event.target).data("row");
-          const col = document.getSelection().baseOffset;
-          xhttp = new XMLHttpRequest();
-          xhttp.onreadystatechange = function() {
-            if (this.status == 200 && this.responseText) {
-              const resp = JSON.parse(this.responseText);
-              if (resp.success) {
-                window.location.replace(resp.url);
-              }
-            }
-          }
-
-          xhttp.open("GET", "/api/v1/langserver/jumptodef?repo_name=" + window.repoInfo.name + "&file_path=" + window.filePath + "&row=" + row + "&col=" + col);
-          xhttp.send()
+          triggerJumpToDef(event);
         }
       });
 

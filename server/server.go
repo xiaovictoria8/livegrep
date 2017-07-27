@@ -50,8 +50,29 @@ type GotoDefRequest struct {
 }
 
 type GotoDefResponse struct {
-	Success bool   `json:"success"`
-	URL     string `json:"url"`
+	URL string `json:"url"`
+}
+
+type SymbolInformation struct {
+	Name          string   `json:"name"`
+	Kind          int      `json:"kind"`
+	Location      Location `json:"location"`
+	containerName string   `json:"container_name"`
+}
+
+type Location struct {
+	URI       string `json:"uri"`
+	TextRange Range  `json:"text_range"`
+}
+
+type Range struct {
+	Start Position `json:"start"`
+	End   Position `json:"end"`
+}
+
+type Position struct {
+	Line      int `json:"line"`
+	Character int `json:"character"`
 }
 
 func (s *server) loadTemplates() {
@@ -233,19 +254,6 @@ func (s *server) ServeOpensearch(ctx context.Context, w http.ResponseWriter, r *
 	w.Write(body)
 }
 
-type GotoDefRequest struct {
-	Repo     string `json:"repo"`
-	FilePath string `json:"file_path"`
-	Row      int    `json:"row"`
-	Col      int    `json:"col"`
-}
-
-type GotoDefResponse struct {
-	Success    bool   `json:"success"`
-	FilePath   string `json:"file_path"`
-	LineNumber int    `json:"line_num"`
-}
-
 func (s *server) ServeJumpToDef(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	params := r.URL.Query()
 	fmt.Println("ServeJumpToDef")
@@ -266,13 +274,54 @@ func (s *server) ServeJumpToDef(ctx context.Context, w http.ResponseWriter, r *h
 
 		filePath := "server/templates.go"
 		lineNum := 2
+
+		//TODO (xiaov): add response with error code if no def is found
 		replyJSON(ctx, w, 200, &GotoDefResponse{
-			Success: true,
-			URL:     "/view/" + repoName + "/" + filePath + "#L" + strconv.Itoa(lineNum),
+			URL: "/view/" + repoName + "/" + filePath + "#L" + strconv.Itoa(lineNum),
 		})
 	}
 }
 
+func (s *server) ServeGetFunctions(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	//TODO: make some Langserver request here
+
+	testLoc := Location{URI: "", TextRange: Range{Start: Position{Line: 26, Character: 10}, End: Position{Line: 26, Character: 16}}}
+	testSymbol := SymbolInformation{Name: "", Kind: 12, Location: testLoc, containerName: ""}
+	symList := [1]SymbolInformation{testSymbol}
+
+	funcList := []Range{}
+	for _, item := range symList {
+		if item.Kind == 12 {
+			funcList = append(funcList, item.Location.TextRange)
+		}
+	}
+
+	fmt.Printf("list: %v\n", funcList)
+
+	replyJSON(ctx, w, 200, funcList)
+}
+
+// type SymbolInformation struct {
+// 	Name          string   `json:"name"`
+// 	Kind          int      `json:"kind"`
+// 	Location      Location `json:"location"`
+// 	containerName string   `json:"container_name"`
+// }
+
+// type Location struct {
+// 	URI       string `json:"uri"`
+// 	TextRange Range  `json:"text_range"`
+// }
+
+// type Range struct {
+// 	Start Position `json:"start"`
+// 	End   Position `json:"end"`
+// }
+
+// type Position struct {
+// 	Line      int `json:"line"`
+// 	Character int `json:"character"`
+// }
 type handler func(c context.Context, w http.ResponseWriter, r *http.Request)
 
 const RequestTimeout = 8 * time.Second
@@ -343,6 +392,7 @@ func New(cfg *config.Config) (http.Handler, error) {
 	m.Add("GET", "/api/v1/search/:backend", srv.Handler(srv.ServeAPISearch))
 	m.Add("GET", "/api/v1/search/", srv.Handler(srv.ServeAPISearch))
 	m.Add("GET", "/api/v1/langserver/jumptodef", srv.Handler(srv.ServeJumpToDef))
+	m.Add("GET", "/api/v1/langserver/get_functions", srv.Handler(srv.ServeGetFunctions))
 
 	var h http.Handler = m
 
