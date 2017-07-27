@@ -21,3 +21,12 @@ type Position struct {
 	Line      int `json:"line"`
 	Character int `json:"character"`
 }
+
+type TextDocumentPositionParams struct {
+	TextDocument TextDocumentIdentifier `json:"textDocument"`
+	Position     Position               `json:"position"`
+}
+
+type TextDocumentIdentifier struct {
+	URI string `json:"uri"`
+}

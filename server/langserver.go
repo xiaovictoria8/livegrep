@@ -7,6 +7,8 @@ import (
 	"net"
 	"strings"
 
+	lngs "github.com/livegrep/livegrep/server/langserver"
+
 	"github.com/livegrep/livegrep/server/config"
 	"github.com/sourcegraph/jsonrpc2"
 )
@@ -27,30 +29,6 @@ type InitializeResult struct {
 	Capabilities ServerCapabilities `json:"capabilities"`
 }
 
-type TextDocumentIdentifier struct {
-	Uri string `json:"uri"`
-}
-
-type Position struct {
-	Line      int `json:"line"`
-	Character int `json:"character"`
-}
-
-type TextDocumentPositionParams struct {
-	TextDocument TextDocumentIdentifier `json:"textDocument"`
-	Position     Position               `json:"position"`
-}
-
-type RangeType struct {
-	Start Position `json:"start"`
-	End   Position `json:"end"`
-}
-
-type Location struct {
-	Uri       string    `json:"uri"`
-	TextRange RangeType `json:"range"`
-}
-
 func getLangServerFromFileExt(repo config.RepoConfig, filePath string) *config.LangServer {
 	normalizedExt := func(path string) string {
 		split := strings.Split(path, ".")
@@ -69,7 +47,7 @@ func getLangServerFromFileExt(repo config.RepoConfig, filePath string) *config.L
 
 type LangServerClient interface {
 	Initialize(params InitializeParams) (InitializeResult, error)
-	JumpToDef(params *TextDocumentPositionParams) (Location, error)
+	JumpToDef(params *lngs.TextDocumentPositionParams) (lngs.Location, error)
 }
 
 type langServerClientImpl struct {
@@ -113,7 +91,7 @@ func (c *langServerClientImpl) Initialize(params InitializeParams) (result Initi
 	return result, err
 }
 
-func (c *langServerClientImpl) JumpToDef(params *TextDocumentPositionParams) (result Location, err error) {
+func (c *langServerClientImpl) JumpToDef(params *lngs.TextDocumentPositionParams) (result lngs.Location, err error) {
 	fmt.Println("GotoDefRequest")
 	err = c.rpcClient.Call(c.ctx, "textDocument/definition", params, &result)
 	fmt.Println("Done GotoDefRequest")
