@@ -15,6 +15,8 @@ import (
 	"github.com/bmizerany/pat"
 	libhoney "github.com/honeycombio/libhoney-go"
 
+	lngs "github.com/livegrep/livegrep/server/langserver"
+
 	"github.com/livegrep/livegrep/server/config"
 	"github.com/livegrep/livegrep/server/log"
 	"github.com/livegrep/livegrep/server/reqid"
@@ -51,28 +53,6 @@ type GotoDefRequest struct {
 
 type GotoDefResponse struct {
 	URL string `json:"url"`
-}
-
-type SymbolInformation struct {
-	Name          string   `json:"name"`
-	Kind          int      `json:"kind"`
-	Location      Location `json:"location"`
-	containerName string   `json:"container_name"`
-}
-
-type Location struct {
-	URI       string `json:"uri"`
-	TextRange Range  `json:"text_range"`
-}
-
-type Range struct {
-	Start Position `json:"start"`
-	End   Position `json:"end"`
-}
-
-type Position struct {
-	Line      int `json:"line"`
-	Character int `json:"character"`
 }
 
 func (s *server) loadTemplates() {
@@ -264,9 +244,9 @@ func (s *server) ServeJumpToDef(ctx context.Context, w http.ResponseWriter, r *h
 		// col, _ := strconv.Atoi(params["col"][0])
 		repoName := params["repo_name"][0]
 
-		// TODO(xiaov): uncomment this once langserver actually works
+		//TODO(xiaov): uncomment this once langserver actually works
 		// RequestLangServer(s, &GotoDefRequest{
-		//  RepoName: repo_name,
+		// 	RepoName: repo_name,
 		// 	FilePath: params["file_path"][0],
 		// 	Row:      row,
 		// 	Col:      col,
@@ -283,13 +263,13 @@ func (s *server) ServeJumpToDef(ctx context.Context, w http.ResponseWriter, r *h
 }
 
 func (s *server) ServeGetFunctions(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-	//TODO: make some Langserver request here
+	//TODO: make some Langserver request to documentSymbol here
 
-	testLoc := Location{URI: "", TextRange: Range{Start: Position{Line: 26, Character: 10}, End: Position{Line: 26, Character: 16}}}
-	testSymbol := SymbolInformation{Name: "", Kind: 12, Location: testLoc, containerName: ""}
-	symList := [1]SymbolInformation{testSymbol}
+	testLoc := lngs.Location{URI: "", TextRange: lngs.Range{Start: lngs.Position{Line: 26, Character: 10}, End: lngs.Position{Line: 26, Character: 16}}}
+	testSymbol := lngs.SymbolInformation{Name: "", Kind: 12, Location: testLoc, ContainerName: ""}
+	symList := [1]lngs.SymbolInformation{testSymbol}
 
-	funcList := []Range{}
+	funcList := []lngs.Range{}
 	for _, item := range symList {
 		if item.Kind == 12 {
 			funcList = append(funcList, item.Location.TextRange)
@@ -301,27 +281,6 @@ func (s *server) ServeGetFunctions(ctx context.Context, w http.ResponseWriter, r
 	replyJSON(ctx, w, 200, funcList)
 }
 
-// type SymbolInformation struct {
-// 	Name          string   `json:"name"`
-// 	Kind          int      `json:"kind"`
-// 	Location      Location `json:"location"`
-// 	containerName string   `json:"container_name"`
-// }
-
-// type Location struct {
-// 	URI       string `json:"uri"`
-// 	TextRange Range  `json:"text_range"`
-// }
-
-// type Range struct {
-// 	Start Position `json:"start"`
-// 	End   Position `json:"end"`
-// }
-
-// type Position struct {
-// 	Line      int `json:"line"`
-// 	Character int `json:"character"`
-// }
 type handler func(c context.Context, w http.ResponseWriter, r *http.Request)
 
 const RequestTimeout = 8 * time.Second
