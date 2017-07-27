@@ -29,7 +29,7 @@ type InitializeResult struct {
 	Capabilities ServerCapabilities `json:"capabilities"`
 }
 
-func getLangServerFromFileExt(repo config.RepoConfig, filePath string) *config.LangServer {
+func GetLangServerFromFileExt(repo config.RepoConfig, filePath string) *config.LangServer {
 	normalizedExt := func(path string) string {
 		split := strings.Split(path, ".")
 		ext := split[len(split)-1]
