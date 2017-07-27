@@ -241,14 +241,16 @@ func (s *server) ServeJumpToDef(ctx context.Context, w http.ResponseWriter, r *h
 	fmt.Printf("r.URL.Query(): %v\n", r.URL.Query())
 
 	if len(params["repo_name"]) == 1 && len(params["file_path"]) == 1 && len(params["row"]) == 1 && len(params["col"]) == 1 {
-		row, _ := strconv.Atoi(params["row"][0])
-		col, _ := strconv.Atoi(params["col"][0])
+		// row, _ := strconv.Atoi(params["row"][0])
+		// col, _ := strconv.Atoi(params["col"][0])
 		repoName := params["repo_name"][0]
 
-		uri := s.config.RepoConfig.Path
-		input := lngs.TextDocumentPositionParams{TextDocument: lngs.TextDocumentIdentifier{URI: uri}, lngs.Position{Line: row, Character: col}}
+		// uri := s.config.IndexConfig.Repositories[0].Path
+		// input := lngs.TextDocumentPositionParams{TextDocument: lngs.TextDocumentIdentifier{URI: uri}, Position: lngs.Position{Line: row, Character: col}}
 
-		locations, _ := JumpToDef(input)
+		//TODO (anurag): initialize a langServerClientImpl and call the function below on it
+		// Or probably you should just initialize one instance and store it on the server, discuss with stas
+		// locations, _ := JumpToDef(input)
 
 		filePath := "server/templates.go"
 		lineNum := 2
@@ -263,13 +265,16 @@ func (s *server) ServeJumpToDef(ctx context.Context, w http.ResponseWriter, r *h
 func (s *server) ServeGetFunctions(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	params := r.URL.Query()
 
-	if len(params["file_path"]) == 1:
-		filePath := params["file_path"]
+	if len(params["file_path"]) == 1 {
+		// filePath := params["file_path"]
 		//TODO (stas): convert filePath into the correct input for AllSymbols() and pass it in
 		// Also probably good to test to make sure my code below works
-		input := nil 
+		// input := nil
 
-		symList, _ := AllSymbols(input)
+		//TODO (stas): initialize a langServerClientImpl and call the function below on it
+		// Or probably you should just initialize one instance and store it on the server, discuss with anurag
+		// symList, _ := AllSymbols(input)
+		symList := []lngs.SymbolInformation{}
 
 		funcList := []lngs.Range{}
 		for _, item := range symList {
@@ -281,6 +286,7 @@ func (s *server) ServeGetFunctions(ctx context.Context, w http.ResponseWriter, r
 		fmt.Printf("list: %v\n", funcList)
 
 		replyJSON(ctx, w, 200, funcList)
+	}
 }
 
 type handler func(c context.Context, w http.ResponseWriter, r *http.Request)
