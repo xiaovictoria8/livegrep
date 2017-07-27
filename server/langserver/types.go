@@ -9,7 +9,7 @@ type SymbolInformation struct {
 
 type Location struct {
 	URI       string `json:"uri"`
-	Range Range  `json:"range"`
+	TextRange Range  `json:"range"`
 }
 
 type Range struct {
