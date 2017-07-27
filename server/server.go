@@ -281,7 +281,11 @@ func (s *server) ServeGetFunctions(ctx context.Context, w http.ResponseWriter, r
 		//TODO (stas): initialize a langServerClientImpl and call the function below on it
 		// Or probably you should just initialize one instance and store it on the server, discuss with anurag
 		// symList, _ := AllSymbols(input)
-		symList := []lngs.SymbolInformation{}
+		// symList := []lngs.SymbolInformation{}
+
+		testLoc := lngs.Location{URI: "", TextRange: lngs.Range{Start: lngs.Position{Line: 26, Character: 10}, End: lngs.Position{Line: 26, Character: 16}}}
+		testSymbol := lngs.SymbolInformation{Name: "", Kind: 12, Location: testLoc, ContainerName: ""}
+		symList := [1]lngs.SymbolInformation{testSymbol}
 
 		funcList := []lngs.Range{}
 		for _, item := range symList {

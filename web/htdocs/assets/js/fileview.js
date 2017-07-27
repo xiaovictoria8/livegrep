@@ -248,14 +248,20 @@
       xhttp = new XMLHttpRequest();
       xhttp.onreadystatechange = function() {
         if (this.status == 200 && this.responseText) {
-          const originalContent = $('#source-code').text();
+
+          // the source code being displayed as an array of lines
+          const originalContent = $('#source-code').text().split("\n");
           const funcList = JSON.parse(this.responseText);
+
           console.log("originalContent: " + originalContent);
-          for (let i = 0; i < funcList.lenght; i++) {
+          console.log("this.responseText: " + this.responseText);
+
+          for (let i = 0; i < funcList.length; i++) {
             console.log(JSON.stringify(funcList[i]));
           }
 
-          console.log("this.responseText: " + this.responseText);
+
+
         }
       }
 
