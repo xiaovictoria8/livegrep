@@ -3,7 +3,7 @@
     "repositories": [
         {
             "name": "livegrep",
-            "path": "/home/anurag/hackweek/livegrep",
+            "path": "/home/ldanilek/livegrep",
             "revisions": [
                 "HEAD"
             ],
