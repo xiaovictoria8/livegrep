@@ -298,6 +298,10 @@ a:hover {
     color: #4d4d4c; /* Match the text color of HLJS to avoid shift when the JS has finished */
 }
 
+.file-viewer .code .langserver-symbol:hover {
+    text-decoration: underline;
+}
+
 .file-viewer .code.hljs {
     background: transparent !important; /* Override HLJS default styling */
 }
