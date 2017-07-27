@@ -265,7 +265,7 @@
     }
 
     function triggerJumpToDef(event) {
-      const row = $(event.target).data("row");
+      const row = $(event.target).data("row") || $(event.target).parent().data("row");
       const col = document.getSelection().baseOffset;
 
       xhttp = new XMLHttpRequest();
