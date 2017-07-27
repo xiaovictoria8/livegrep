@@ -253,8 +253,7 @@
           console.log("originalContent: " + originalContent);
           for (let i = 0; i < funcList.lenght; i++) {
             console.log(JSON.stringify(funcList[i]));
-
-          // $('#source-code').html(this.responseText);
+          }
 
           console.log("this.responseText: " + this.responseText);
         }
