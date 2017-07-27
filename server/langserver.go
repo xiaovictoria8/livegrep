@@ -97,3 +97,10 @@ func (c *langServerClientImpl) JumpToDef(params *lngs.TextDocumentPositionParams
 	fmt.Println("Done GotoDefRequest")
 	return result, err
 }
+
+func (c *langServerClientImpl) AllSymbols(params *lngs.DocumentSymbolParams) (result []lngs.SymbolInformation, err error) {
+	fmt.Println("Symbol Search")
+	err = c.rpcClient.Call(c.ctx, "textDocument/documentSymbol", params, &result)
+	fmt.Println("Symbol search done")
+	return
+}
