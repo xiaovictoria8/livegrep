@@ -1,84 +1,57 @@
 package server
 
 import (
+	"context"
 	"fmt"
-	"net/rpc/jsonrpc"
+
+	"net"
 	"strings"
 
 	"github.com/livegrep/livegrep/server/config"
+	"github.com/sourcegraph/jsonrpc2"
 )
 
-type requestMessage struct {
-	JsonRpc string      `json:"jsonrpc"`
-	Id      int         `json:"id"`
-	Method  string      `json:"method"`
-	Params  interface{} `json:"params"`
+type ClientCapabilities struct{}
+
+type ServerCapabilities struct{}
+
+type InitializeParams struct {
+	ProcessId        *int               `json:"processId"`
+	OriginalRootPath string             `json:"originalRootPath"`
+	RootPath         string             `json:"rootPath"`
+	RootUri          string             `json:"rootUri"`
+	Capabilities     ClientCapabilities `json:"capabilities"`
 }
 
-type textDocumentIdentifier struct {
+type InitializeResult struct {
+	Capabilities ServerCapabilities `json:"capabilities"`
+}
+
+type TextDocumentIdentifier struct {
 	Uri string `json:"uri"`
 }
 
-type position struct {
+type Position struct {
 	Line      int `json:"line"`
 	Character int `json:"character"`
 }
 
-type textDocumentPositionParams struct {
-	TextDocument textDocumentIdentifier `json:"textDocument"`
-	Position     position               `json:"position"`
+type TextDocumentPositionParams struct {
+	TextDocument TextDocumentIdentifier `json:"textDocument"`
+	Position     Position               `json:"position"`
 }
 
-type rangeType struct {
-	Start position `json:"start"`
-	End   position `json:"end"`
+type RangeType struct {
+	Start Position `json:"start"`
+	End   Position `json:"end"`
 }
 
-type location struct {
+type Location struct {
 	Uri       string    `json:"uri"`
-	TextRange rangeType `json:"range"`
+	TextRange RangeType `json:"range"`
 }
 
-type ClientCapabilities struct{}
-
-type initializeParams struct {
-	ProcessId          *int               `'json':"processId"`
-	RootUri            string             `'json':"rootUri"`
-	ClientCapabilities ClientCapabilities `'json':"clientCapabilities"`
-}
-
-var id int = 0
-
-func InitLangServer(langServer config.LangServer, repoConfig config.RepoConfig) bool {
-	rpcClient, err := jsonrpc.Dial("tcp", langServer.Address)
-	if err != nil {
-		fmt.Println(err)
-		return false
-	}
-	langServer.RpcClient = rpcClient
-	id++
-	params := requestMessage{
-		JsonRpc: "3.0",
-		Id:      id,
-		Method:  "initialize",
-		Params: initializeParams{
-			ProcessId:          nil,
-			RootUri:            repoConfig.Path,
-			ClientCapabilities: ClientCapabilities{},
-		},
-	}
-	// todo: read actual response
-	var response ClientCapabilities
-	fmt.Println("about to init!")
-	err = rpcClient.Call("", params, &response)
-	fmt.Println("done initting!")
-	if err != nil {
-		return false
-	}
-	return true
-}
-
-func getLangServerFromFileExt(repo config.RepoConfig, clientRequest *GotoDefRequest) *config.LangServer {
+func getLangServerFromFileExt(repo config.RepoConfig, filePath string) *config.LangServer {
 	normalizedExt := func(path string) string {
 		split := strings.Split(path, ".")
 		ext := split[len(split)-1]
@@ -86,7 +59,7 @@ func getLangServerFromFileExt(repo config.RepoConfig, clientRequest *GotoDefRequ
 	}
 	for _, langServer := range repo.LangServers {
 		for _, ext := range langServer.Extensions {
-			if normalizedExt(clientRequest.FilePath) == normalizedExt(ext) {
+			if normalizedExt(filePath) == normalizedExt(ext) {
 				return &langServer
 			}
 		}
@@ -94,38 +67,55 @@ func getLangServerFromFileExt(repo config.RepoConfig, clientRequest *GotoDefRequ
 	return nil
 }
 
-func RequestLangServer(s *server, clientRequest *GotoDefRequest) {
+type LangServerClient interface {
+	Initialize(params InitializeParams) (InitializeResult, error)
+	JumpToDef(params *TextDocumentPositionParams) (Location, error)
+}
 
-	langServer := getLangServerFromFileExt(s.repos[clientRequest.RepoName], clientRequest)
+type langServerClientImpl struct {
+	rpcClient *jsonrpc2.Conn
+	ctx       context.Context
+}
 
-	address := langServer.Address
-	fmt.Println(address)
-	rpcClient, err := jsonrpc.Dial("tcp", address)
+type responseHandler struct {
+}
+
+func (r responseHandler) Handle(ctx context.Context, conn *jsonrpc2.Conn, req *jsonrpc2.Request) {
+	// TODO
+	fmt.Println("Response handler called")
+}
+
+func CreateLangServerClient(address string) (client LangServerClient, err error) {
+	fmt.Println("create lang server client")
+	ctx := context.Background()
+	codec := jsonrpc2.VSCodeObjectCodec{}
+	conn, err := net.Dial("tcp", address)
 	if err != nil {
-		panic(err)
+		return
 	}
-
-	fmt.Println("dialed")
-
-	id++
-	m := requestMessage{
-		JsonRpc: "3.0",
-		Id:      id,
-		Method:  "textDocument/definition",
-		Params: textDocumentPositionParams{
-			TextDocument: textDocumentIdentifier{
-				Uri: clientRequest.FilePath,
-			},
-			Position: position{
-				Line:      clientRequest.Row,
-				Character: clientRequest.Col,
-			},
-		},
+	handler := responseHandler{}
+	rpcConn := jsonrpc2.NewConn(ctx, jsonrpc2.NewBufferedStream(conn, codec), handler)
+	client = &langServerClientImpl{
+		rpcClient: rpcConn,
+		ctx:       ctx,
 	}
-	fmt.Printf("%+v\n", m)
-	var resp location
-	rpcClient.Call("", m, &resp)
+	fmt.Println("done creating lang server client")
+	return client, nil
+}
 
-	fmt.Println(resp)
+func (c *langServerClientImpl) Initialize(params InitializeParams) (result InitializeResult, err error) {
+	fmt.Println("Initialize")
+	err = c.rpcClient.Call(c.ctx, "initialize", params, &result)
+	fmt.Println("Done initializing")
+	if err != nil {
+		c.rpcClient.Call(c.ctx, "initialized", nil, nil)
+	}
+	return result, err
+}
 
+func (c *langServerClientImpl) JumpToDef(params *TextDocumentPositionParams) (result Location, err error) {
+	fmt.Println("GotoDefRequest")
+	err = c.rpcClient.Call(c.ctx, "textDocument/definition", params, &result)
+	fmt.Println("Done GotoDefRequest")
+	return result, err
 }
