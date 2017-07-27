@@ -241,11 +241,11 @@ func (s *server) ServeJumpToDef(ctx context.Context, w http.ResponseWriter, r *h
 	fmt.Printf("r.URL.Query(): %v\n", r.URL.Query())
 
 	if len(params["repo_name"]) == 1 && len(params["file_path"]) == 1 && len(params["row"]) == 1 && len(params["col"]) == 1 {
-		// row, _ := strconv.Atoi(params["row"][0])
-		// col, _ := strconv.Atoi(params["col"][0])
+		row, _ := strconv.Atoi(params["row"][0])
+		col, _ := strconv.Atoi(params["col"][0])
 		repoName := params["repo_name"][0]
+
 		uri := s.config.RepoConfig.Path
-		fmt.Printf("uri: %v\n", uri)
 		input := lngs.TextDocumentPositionParams{TextDocument: lngs.TextDocumentIdentifier{URI: uri}, lngs.Position{Line: row, Character: col}}
 
 		locations, _ := JumpToDef(input)
@@ -261,22 +261,26 @@ func (s *server) ServeJumpToDef(ctx context.Context, w http.ResponseWriter, r *h
 }
 
 func (s *server) ServeGetFunctions(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-	//TODO: make some Langserver request to documentSymbol here
+	params := r.URL.Query()
 
-	testLoc := lngs.Location{URI: "", TextRange: lngs.Range{Start: lngs.Position{Line: 26, Character: 10}, End: lngs.Position{Line: 26, Character: 16}}}
-	testSymbol := lngs.SymbolInformation{Name: "", Kind: 12, Location: testLoc, ContainerName: ""}
-	symList := [1]lngs.SymbolInformation{testSymbol}
+	if len(params["file_path"]) == 1:
+		filePath := params["file_path"]
+		//TODO (stas): convert filePath into the correct input for AllSymbols() and pass it in
+		// Also probably good to test to make sure my code below works
+		input := nil 
 
-	funcList := []lngs.Range{}
-	for _, item := range symList {
-		if item.Kind == 12 {
-			funcList = append(funcList, item.Location.TextRange)
+		symList, _ := AllSymbols(input)
+
+		funcList := []lngs.Range{}
+		for _, item := range symList {
+			if item.Kind == 12 {
+				funcList = append(funcList, item.Location.TextRange)
+			}
 		}
-	}
 
-	fmt.Printf("list: %v\n", funcList)
+		fmt.Printf("list: %v\n", funcList)
 
-	replyJSON(ctx, w, 200, funcList)
+		replyJSON(ctx, w, 200, funcList)
 }
 
 type handler func(c context.Context, w http.ResponseWriter, r *http.Request)
