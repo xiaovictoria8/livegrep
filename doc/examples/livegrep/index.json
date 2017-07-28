@@ -1,14 +1,23 @@
 {
-    "name": "livegrep",
+    "name": "stasbrowse",
     "repositories": [
         {
-            "name": "livegrep",
-            "path": ".",
-            "revisions": [ "HEAD" ],
+            "name": "mypy",
+            "path": "/home/xiaov/src/mypy",
+            "revisions": [
+                "HEAD"
+            ],
             "metadata": {
-                "url-pattern": "/view/{name}/src/{path}",
-                "github": "nelhage/livegrep"
-            }
+                "url-pattern": "/view/{name}/{path}"
+            },
+            "lang_servers": [
+                {
+                    "address": "0.0.0.0:3141",
+                    "extensions": [
+                        ".py"
+                    ]
+                }
+            ]
         }
     ]
 }

@@ -242,72 +242,72 @@
       }
     }
 
-    function decorateFunctions() {
-      console.log("addLinksToFunctionSymbols");
+    // function decorateFunctions() {
+    //   console.log("addLinksToFunctionSymbols");
 
-      xhttp = new XMLHttpRequest();
-      xhttp.onreadystatechange = function() {
-        if (this.status == 200 && this.responseText) {
+    //   xhttp = new XMLHttpRequest();
+    //   xhttp.onreadystatechange = function() {
+    //     if (this.status == 200 && this.responseText) {
 
-          // the source code being displayed as an array of lines
-          const contentArr = $('#source-code').text().split("\n");
+    //       // the source code being displayed as an array of lines
+    //       const contentArr = $('#source-code').text().split("\n");
 
-          console.log("this.responseText: " + this.responseText);
-          console.log("contentArr: " + JSON.stringify(contentArr));
+    //       console.log("this.responseText: " + this.responseText);
+    //       console.log("contentArr: " + JSON.stringify(contentArr));
 
-          const rangeList = JSON.parse(this.responseText)
-          const posList = []
+    //       const rangeList = JSON.parse(this.responseText)
+    //       const posList = []
 
-          for (let i = 0; i < rangeList.length; i++) {
-            let rangeObj = rangeList[i] 
-            posList.push({
-              "end": false,
-              "line": rangeObj.start.line - 1,
-              "character": rangeObj.start.character,
-            });
-            posList.push({
-              "end": true,
-              "line": rangeObj.end.line - 1,
-              "character": rangeObj.end.character,
-            });
-          }
+    //       for (let i = 0; i < rangeList.length; i++) {
+    //         let rangeObj = rangeList[i] 
+    //         posList.push({
+    //           "end": false,
+    //           "line": rangeObj.start.line,
+    //           "character": rangeObj.start.character,
+    //         });
+    //         posList.push({
+    //           "end": true,
+    //           "line": rangeObj.end.line,
+    //           "character": rangeObj.end.character,
+    //         });
+    //       }
 
-          console.log("unsorted posList: " + JSON.stringify(posList));
+    //       console.log("unsorted posList: " + JSON.stringify(posList));
 
-          // sort backwards to maintain indices of symbols when adding span tags
-          posList.sort(
-            (a, b) => {
-              if (a.line < b.line) return 1;
-              else if (a.line > b.line) return -1;
-              else return b.character - a.character;
-            } 
-          )
-          console.log("sorted posList: " + JSON.stringify(posList));
+    //       // sort backwards to maintain indices of symbols when adding span tags
+    //       posList.sort(
+    //         (a, b) => {
+    //           if (a.line < b.line) return 1;
+    //           else if (a.line > b.line) return -1;
+    //           else return b.character - a.character;
+    //         } 
+    //       )
+    //       console.log("sorted posList: " + JSON.stringify(posList));
 
-          for (let i = 0; i < posList.length; i++) {
-            const pos = posList[i];
-            const contentLine = contentArr[pos.line];
-            const span_tag = pos.end? "</span>" : "<span class='langserver-symbol' data-row=" + pos.line + " data-col=" + pos.character + ">";
-            contentArr[pos.line] = [contentLine.slice(0, pos.character), span_tag, contentLine.slice(pos.character)].join('');
+    //       for (let i = 0; i < posList.length; i++) {
+    //         const pos = posList[i];
+    //         const contentLine = contentArr[pos.line];
+    //         const span_tag = pos.end? "</span>" : "<span class='langserver-symbol' data-row=" + pos.line + " data-col=" + pos.character + ">";
+    //         contentArr[pos.line] = [contentLine.slice(0, pos.character), span_tag, contentLine.slice(pos.character)].join('');
           
-            console.log("pos: " + JSON.stringify(pos));
-            console.log("contentLine: " + contentLine);
-            console.log("contentArr[pos.line]: " + contentArr[pos.line]);
-          }
+    //         console.log("pos: " + JSON.stringify(pos));
+    //         console.log("contentLine: " + contentLine);
+    //         console.log("contentArr[pos.line]: " + contentArr[pos.line]);
+    //       }
 
-          $('#source-code').html(contentArr.join("\n"));
-          hljs.highlightBlock($('#source-code')[0]);
-        }
-      }
+    //       $('#source-code').html(contentArr.join("\n"));
+    //       hljs.highlightBlock($('#source-code')[0]);
+    //     }
+    //   }
 
-      console.log("sending xhttp request /api/v1/langserver/get_functions?file_path=" + window.filePath);
-      xhttp.open("GET", "/api/v1/langserver/get_functions?repo_name=" + window.repoInfo.name + "&file_path=" + window.filePath);
-      xhttp.send()
-    }
+    //   console.log("sending xhttp request /api/v1/langserver/get_functions?file_path=" + window.filePath);
+    //   xhttp.open("GET", "/api/v1/langserver/get_functions?repo_name=" + window.repoInfo.name + "&file_path=" + window.filePath);
+    //   xhttp.send()
+    // }
 
     function triggerJumpToDef(event) {
-      const row = $(event.target).data("row") || $(event.target).parent().data("row");
-      const col = $(event.target).data("col") || $(event.target).parent().data("col");
+      const row = $(event.target).data("row") != undefined ? $(event.target).data("row") : $(event.target).parent().data("row");
+      const col = document.getSelection().anchorOffset;
 
       xhttp = new XMLHttpRequest();
       xhttp.onreadystatechange = function() {
@@ -327,7 +327,7 @@
       handleHashChange();
 
       // send request to find and add appriopriate declarations for all function in code
-      decorateFunctions();
+      // decorateFunctions();
 
       // Allow shift clicking links to expand the highlight range
       lineNumberContainer.on('click', 'a', function(event) {
