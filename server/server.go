@@ -261,6 +261,11 @@ func (s *server) ServeJumpToDef(ctx context.Context, w http.ResponseWriter, r *h
 			return
 		}
 
+		if len(locations) == 0 {
+			http.Error(w, "No locations for symbol.", 500)
+			return
+		}
+
 		// Or probably you should just initialize one instance and store it on the server, discuss with stas
 		// locations, _ := JumpToDef(input)
 
