@@ -368,29 +368,29 @@
         handleHashChange();
       });
 
-      // $(document).on('keydown', function(event) {
-      //   // Filter out key events when the user has focused an input field.
-      //   if(!$(event.target).is('input,textarea')) {
-      //     processKeyEvent(event);
-      //   }
+      $(document).on('keydown', function(event) {
+        // Filter out key events when the user has focused an input field.
+        if(!$(event.target).is('input,textarea')) {
+          processKeyEvent(event);
+        }
 
-      //   if ( event.which === KeyCodes.COMMAND) {
-      //     isCmdDown = true;
-      //   }
-      // });
+        if ( event.which === KeyCodes.COMMAND) {
+          isCmdDown = true;
+        }
+      });
 
-      // $(document).on('keyup', function(event) {
-      //   if ( event.which === KeyCodes.COMMAND) {
-      //     isCmdDown = false;
-      //   }
-      // });
+      $(document).on('keyup', function(event) {
+        if ( event.which === KeyCodes.COMMAND) {
+          isCmdDown = false;
+        }
+      });
 
-      // // if cmd + click is found, trigger jump to definition 
-      // $(document).on('click', function(event) {
-      //   if ( isCmdDown ) {
-      //     triggerJumpToDef(event);
-      //   }
-      // });
+      // if cmd + click is found, trigger jump to definition
+      $(document).on('click', function(event) {
+        if ( isCmdDown ) {
+          triggerJumpToDef(event);
+        }
+      });
 
       initializeActionButtons($('.header .header-actions'));
     }
