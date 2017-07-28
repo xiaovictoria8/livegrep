@@ -249,7 +249,7 @@ func (s *server) ServeJumpToDef(ctx context.Context, w http.ResponseWriter, r *h
 		repoName := params["repo_name"][0]
 
 		//uri := s.config.IndexConfig.Repositories[0].Path
-		uri := s.config.IndexConfig.Repositories[0].Path + "/" + params["file_path"][0]
+		uri := "file://" + s.config.IndexConfig.Repositories[0].Path + "/" + params["file_path"][0]
 		params := lngs.TextDocumentPositionParams{TextDocument: lngs.TextDocumentIdentifier{URI: uri}, Position: lngs.Position{Line: row, Character: col}}
 
 		//TODO (anurag): initialize a langServerClientImpl and call the function below on it
@@ -384,7 +384,7 @@ func New(cfg *config.Config) (http.Handler, error) {
 				ProcessId:        nil,
 				OriginalRootPath: r.Path,
 				RootPath:         r.Path,
-				RootUri:          r.Path,
+				RootUri:          "file://" + r.Path,
 				Capabilities:     ClientCapabilities{},
 			})
 			fmt.Println(initResult)
