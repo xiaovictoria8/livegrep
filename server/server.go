@@ -17,12 +17,13 @@ import (
 
 	lngs "github.com/livegrep/livegrep/server/langserver"
 
+	"path/filepath"
+	"strings"
+
 	"github.com/livegrep/livegrep/server/config"
 	"github.com/livegrep/livegrep/server/log"
 	"github.com/livegrep/livegrep/server/reqid"
 	"github.com/livegrep/livegrep/server/templates"
-	"path/filepath"
-	"strings"
 )
 
 type Templates struct {
@@ -279,7 +280,7 @@ func (s *server) ServeJumpToDef(ctx context.Context, w http.ResponseWriter, r *h
 
 		//TODO (xiaov): add response with error code if no def is found
 		replyJSON(ctx, w, 200, &GotoDefResponse{
-			URL: "/view/" + repoName + "/" + relPath + "#L" + strconv.Itoa(lineNum),
+			URL: "/view/" + repoName + "/" + relPath + "#L" + strconv.Itoa(lineNum+1),
 		})
 	}
 }

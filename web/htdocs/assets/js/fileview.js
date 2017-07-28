@@ -306,7 +306,7 @@
     // }
 
     function triggerJumpToDef(event) {
-      const row = $(event.target).data("row") != undefined ? $(event.target).data("row") : $(event.target).parent().data("row");
+      const row = $(event.target).data("row") != undefined ? $(event.target).data("row") - 1 : $(event.target).parent().data("row") - 1;
       const col = document.getSelection().anchorOffset;
 
       xhttp = new XMLHttpRequest();
@@ -314,6 +314,8 @@
         if (this.status == 200 && this.responseText) {
           const resp = JSON.parse(this.responseText);
           window.location.replace(resp.url);
+        } else {
+          console.log("ERROR: " + this.status);
         }
       }
 
