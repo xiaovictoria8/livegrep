@@ -306,7 +306,11 @@
     // }
 
     function triggerJumpToDef(event) {
-      const row = $(event.target).data("row") != undefined ? $(event.target).data("row") - 1 : $(event.target).parent().data("row") - 1;
+      let curEvent = $(event.target);
+      while ((curEvent.attr('class') && curEvent.attr('class').substring(0, 4) === "hljs") || curEvent.data("row") === undefined) {
+        curEvent = curEvent.parent();
+      }
+      const row = curEvent.data("row");
       const col = document.getSelection().anchorOffset;
 
       xhttp = new XMLHttpRequest();
@@ -324,12 +328,27 @@
       xhttp.send()
     }
 
+    function applyJumpToDefTags() {
+      console.log("APPLYJUMPTODEF TAGS");
+      const contentArr = $('#source-code').text().split("\n");
+      let newHtml = "";
+      
+      for (let i = 0; i < contentArr.length; i++) {
+        newHtml += "<span data-row=" + i + ">" + contentArr[i] + "</span>\n";
+      }
+      
+      $('#source-code').html(newHtml);
+      hljs.highlightBlock($('#source-code')[0]);
+
+    }
+
     function initializePage() {
       // Initial range detection for when the page is loaded
       handleHashChange();
 
       // send request to find and add appriopriate declarations for all function in code
       // decorateFunctions();
+      applyJumpToDefTags();
 
       // Allow shift clicking links to expand the highlight range
       lineNumberContainer.on('click', 'a', function(event) {
